@@ -10,11 +10,11 @@ from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
 import arcgis
+from palletjack import ColorRampReclassifier, FeatureServiceInLineUpdater, SFTPLoader
 from supervisor.message_handlers import SendGridHandler
 from supervisor.models import MessageDetails, Supervisor
 
 from . import secrets
-from .data_coupler import ColorRampReclassifier, FeatureServiceInLineUpdater, SFTPLoader
 
 
 def _make_download_dir(exist_ok=False):
@@ -32,19 +32,25 @@ def _initialize(log_level):
 
     erap_logger = logging.getLogger('era')
     erap_logger.setLevel(log_level)
+    palletjack_logger = logging.getLogger('palletjack')
+    palletjack_logger.setLevel(log_level)
+
     cli_handler = logging.StreamHandler(sys.stdout)
     cli_handler.setLevel(log_level)
     formatter = logging.Formatter(
-        fmt='%(levelname)-7s %(asctime)s %(module)15s:%(lineno)5s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+        fmt='%(levelname)-7s %(asctime)s %(name)15s:%(lineno)5s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
     )
     cli_handler.setFormatter(formatter)
-    erap_logger.addHandler(cli_handler)
 
     log_handler = RotatingFileHandler(secrets.ERAP_LOG_PATH, backupCount=secrets.ROTATE_COUNT)
     log_handler.doRollover()  #: Rotate the log on each run
     log_handler.setLevel(log_level)
     log_handler.setFormatter(formatter)
+
+    erap_logger.addHandler(cli_handler)
     erap_logger.addHandler(log_handler)
+    palletjack_logger.addHandler(cli_handler)
+    palletjack_logger.addHandler(log_handler)
 
     erap_logger.debug('Creating Supervisor object')
     erap_supervisor = Supervisor(logger=erap_logger, log_path=secrets.ERAP_LOG_PATH)
