@@ -34,7 +34,7 @@ setup(
     keywords=['gis'],
     install_requires=[
         'agrc-supervisor==2.0.*',
-        'pysftp==0.2.9',
+        # 'agrc-palletjack==1.0.0',
     ],
     extras_require={
         'tests': [
