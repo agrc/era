@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 """
 setup.py
-A module that installs projectname as a module
+A module that installs era as a module
 """
 from glob import glob
 from os.path import basename, splitext
@@ -16,7 +16,7 @@ setup(
     description='Updates for the Emergency Rental Assistance map',
     author='UGRC',
     author_email='agrc@utah.gov',
-    url='https://github.com/agrc/python',
+    url='https://github.com/agrc/era',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
@@ -29,12 +29,12 @@ setup(
         'Topic :: Utilities',
     ],
     project_urls={
-        'Issue Tracker': 'https://github.com/agrc/python/issues',
+        'Issue Tracker': 'https://github.com/agrc/era/issues',
     },
     keywords=['gis'],
     install_requires=[
         'agrc-supervisor==2.0.*',
-        # 'ugrc-palletjack==1.0.0',
+        'ugrc-palletjack==1.0.0',
     ],
     extras_require={
         'tests': [
