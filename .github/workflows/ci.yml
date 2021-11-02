@@ -1,4 +1,4 @@
-name: Build and Test
+name: Build
 
 on: [push, pull_request]
 
@@ -19,11 +19,11 @@ jobs:
     - name: Install module
       run: pip install .[tests]
 
-    - name: Test with pytest
-      run: pytest
+    # - name: Test with pytest
+    #   run: pytest
 
-    - name: Report coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./cov.xml
+    # - name: Report coverage to Codecov
+    #   uses: codecov/codecov-action@v1
+    #   with:
+    #     token: ${{ secrets.CODECOV_TOKEN }}
+    #     file: ./cov.xml
