@@ -28,15 +28,15 @@ def _make_download_dir(exist_ok=False):
         return download_dir
 
 
-def _initialize(log_level):
+def _initialize():
 
     erap_logger = logging.getLogger('era')
-    erap_logger.setLevel(log_level)
+    erap_logger.setLevel(secrets.LOG_LEVEL)
     palletjack_logger = logging.getLogger('palletjack')
-    palletjack_logger.setLevel(log_level)
+    palletjack_logger.setLevel(secrets.LOG_LEVEL)
 
     cli_handler = logging.StreamHandler(sys.stdout)
-    cli_handler.setLevel(log_level)
+    cli_handler.setLevel(secrets.LOG_LEVEL)
     formatter = logging.Formatter(
         fmt='%(levelname)-7s %(asctime)s %(name)15s:%(lineno)5s %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
     )
@@ -44,7 +44,7 @@ def _initialize(log_level):
 
     log_handler = RotatingFileHandler(secrets.ERAP_LOG_PATH, backupCount=secrets.ROTATE_COUNT)
     log_handler.doRollover()  #: Rotate the log on each run
-    log_handler.setLevel(log_level)
+    log_handler.setLevel(secrets.LOG_LEVEL)
     log_handler.setFormatter(formatter)
 
     erap_logger.addHandler(cli_handler)
@@ -65,7 +65,7 @@ def process():
 
     start = datetime.now()
 
-    erap_supervisor = _initialize(logging.INFO)
+    erap_supervisor = _initialize()
     # : Putting this down here so logging/supervisor catches any license issues
     import arcpy  # pylint: disable=import-outside-toplevel
 
@@ -81,11 +81,11 @@ def process():
     module_logger.info('Getting data from FTP')
     erap_loader = SFTPLoader(secrets, erap_download_dir)
     files_downloaded = erap_loader.download_sftp_files(sftp_folder=secrets.SFTP_FOLDER)
-    dataframe = erap_loader.read_csv_into_dataframe('ERAP_PAYMENTS.csv', secrets.ERAP_DATA_TYPES)
+    dataframe = erap_loader.read_csv_into_dataframe(secrets.ERAP_FILE_NAME, secrets.ERAP_DATA_TYPES)
 
     #: Update the AGOL data
     module_logger.info('Updating data in AGOL')
-    erap_updater = FeatureServiceInLineUpdater(dataframe, 'zip5')
+    erap_updater = FeatureServiceInLineUpdater(dataframe, secrets.ERAP_KEY_COLUMN)
     rows_updated = erap_updater.update_feature_service(
         secrets.ERAP_FEATURE_SERVICE_URL, list(secrets.ERAP_DATA_TYPES.keys())
     )
@@ -93,7 +93,7 @@ def process():
     #: Reclassify the break values on the webmap's color ramp
     module_logger.info('Reclassifying the map')
     erap_reclassifier = ColorRampReclassifier(erap_webmap_item, gis)
-    success = erap_reclassifier.update_color_ramp_values(secrets.ERAP_LAYER_NAME, 'Amount')
+    success = erap_reclassifier.update_color_ramp_values(secrets.ERAP_LAYER_NAME, secrets.ERAP_CLASSIFICATION_COLUMN)
 
     reclassifier_result = 'Success'
     if not success:
