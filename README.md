@@ -3,7 +3,7 @@
 ![Build Status](https://github.com/agrc/python/workflows/Build%20and%20Test/badge.svg)
 [![codecov](https://codecov.io/gh/agrc/python/branch/main/graph/badge.svg)](https://codecov.io/gh/agrc/python) -->
 
-A script for updating the Emergency Rental Assistance Program's data and map using [palletjack](https://github.com/agrc/palletjack) for the heavy lifting.
+A script for updating the Emergency Rental Assistance Program's data and map. Uses [palletjack](https://github.com/agrc/palletjack) for the heavy lifting and [supervisor](https://github.com/agrc/supervisor) for error handling/email notifications.
 
 ## Installation
 
@@ -23,13 +23,13 @@ A script for updating the Emergency Rental Assistance Program's data and map usi
 
 ## Running
 
-1. `era` does not depend on any command line arguments; all needed info is set in `secrets.py`. Simply call `era` from your conda environment.
+`era` does not depend on any command line arguments; all needed info is set in `secrets.py`. Simply call `era` from your conda environment.
 
-It first downloads the latest data from SFTP and loads it into a dataframe. There should just be a single file that is overwritten by DWS every Monday morning.
+It first downloads the latest data from SFTP and loads it into a dataframe. There should just be a single file in the directory that is overwritten by DWS every Monday morning.
 
 Next, it uses this dataframe to update the specified feature service row-by-row, skipping rows that don't appear in the dataframe.
 
-Finally, it loads the specified web map, gets the information from the specified layer, and reclassifies the layer's symbology ranges based on a simple linear ramp from the min value to the mean plus one standard deviation (which appears to be AGOL's default unclassed classification scheme).
+Finally, it reclassifies a layer's symbology ranges from the specified web map. It gets all the data from the layer's specified attribute and calculates a simple linear ramp from the min value to the mean plus one standard deviation (which appears to be AGOL's default unclassed classification scheme).
 
 ## Notifications
 
