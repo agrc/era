@@ -1,3 +1,6 @@
+"""Create a new directory in base_dir and delete old directories as needed, logging as we go.
+"""
+
 import logging
 import re
 import shutil
@@ -6,7 +9,7 @@ from datetime import datetime
 module_logger = logging.getLogger(__name__)
 
 
-class FolderRotator:
+class FolderRotator:  # pylint: disable=too-few-public-methods
     """Create a new directory in base_dir and delete old directories as needed, logging as we go.
     """
 
