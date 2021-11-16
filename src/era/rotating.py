@@ -24,31 +24,34 @@ class FolderRotator:  # pylint: disable=too-few-public-methods
         return download_dir
 
     def _make_new_download_dir(self, download_dir_path, exist_ok):
-        self._class_logger.debug(f'Attempting to create new directory {download_dir_path}')
+        self._class_logger.debug(f'Attempting to create new directory `{download_dir_path}`')
         try:
             download_dir_path.mkdir(exist_ok=exist_ok)
         except FileNotFoundError as error:
-            raise FileNotFoundError(f'Base directory {self.base_dir} does not exist.') from error
+            raise FileNotFoundError(f'Base directory `{self.base_dir}`` does not exist.') from error
         else:
-            self._class_logger.debug(f'Successfully created {download_dir_path}')
+            self._class_logger.debug(f'Successfully created `{download_dir_path}`')
             return download_dir_path
 
     #: Rotator Methods
     def _get_all_but_n_most_recent_folder_paths(self, prefix, pattern, max_folder_count):
         pattern = f'{prefix}{pattern}'
         folder_paths = [path for path in self.base_dir.iterdir() if re.match(pattern, path.stem)]
-        return sorted(folder_paths)[-max_folder_count:]
+        if len(folder_paths) <= max_folder_count:
+            logging.debug('max_folder_count greater than number of existing folders; no folders deleted')
+            max_folder_count = 0
+        return sorted(folder_paths)[:-max_folder_count]
 
     def _delete_old_folders(self, folder_paths_to_delete):
         deleted_folders = []
         for folder in folder_paths_to_delete:
             try:
-                self._class_logger.debug(f'Attempting to delete {folder}')
+                self._class_logger.debug(f'Attempting to delete `{folder}`')
                 shutil.rmtree(folder)
             except Exception:
                 pass
             else:
-                self._class_logger.debug(f'Successfully deleted {folder}')
+                self._class_logger.debug(f'Successfully deleted `{folder}`')
                 deleted_folders.append(folder)
 
         return deleted_folders
@@ -83,10 +86,10 @@ class FolderRotator:  # pylint: disable=too-few-public-methods
         Returns:
             Path: Path object to newly created folder
         """
-        download_dir = self._get_new_download_dir_path(prefix, date_format)
-        created_dir_path = self._make_new_download_dir(download_dir, exist_ok)
         folder_paths_to_delete = self._get_all_but_n_most_recent_folder_paths(prefix, pattern, max_folder_count)
         deleted_folders = self._delete_old_folders(folder_paths_to_delete)
         self._class_logger.info(f'Deleted folder(s) for rotation: {deleted_folders}')
+        download_dir = self._get_new_download_dir_path(prefix, date_format)
+        created_dir_path = self._make_new_download_dir(download_dir, exist_ok)
 
         return created_dir_path
