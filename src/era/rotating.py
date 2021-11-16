@@ -28,7 +28,7 @@ class FolderRotator:  # pylint: disable=too-few-public-methods
         try:
             download_dir_path.mkdir(exist_ok=exist_ok)
         except FileNotFoundError as error:
-            raise FileNotFoundError(f'Base directory `{self.base_dir}`` does not exist.') from error
+            raise FileNotFoundError(f'Base directory `{self.base_dir}` does not exist.') from error
         else:
             self._class_logger.debug(f'Successfully created `{download_dir_path}`')
             return download_dir_path
@@ -77,15 +77,17 @@ class FolderRotator:  # pylint: disable=too-few-public-methods
         INFO:
             Directories deleted as part of rotation
 
-        Raises FileNotFoundError if base_dir does not exist. Silently swallows any errors when deleting folders
-        and moves on to the next folder to be deleted.
+        Raises FileNotFoundError if base_dir does not exist. If exist_ok is False (default), it will raise
+        a FileExistsError if the desired new folder already exists. Silently swallows any errors when deleting
+        folders and moves on to the next folder to be deleted.
 
         Args:
             prefix (str, optional): Folder prefix for date. Any spacers(_, -, etc) must be provided in the prefix.
                 Defaults to ''.
             date_format (str, optional): Date format argument to strftime(). Defaults to '%Y%m%d_%H%M%S'
                 (YYYYMMDD_hhmmss).
-            exist_ok (bool, optional): Overwrite an existing folder?. Defaults to False.
+            exist_ok (bool, optional): If exist_ok is False, a FileExistsError is raised if the new download directory
+                already exists. Defaults to False.
             pattern (str, optional): Regex date matching pattern to determine folders eligible for rotation deletion.
                 Defaults to '[0-9]{8}_[0-9]{6}' (matches default date_format).
             max_folder_count (int, optional): Number of folders to keep, not including the folder created.
