@@ -19,7 +19,7 @@ SENDGRID_SETTINGS = {
     'api_key': '',
     'from_address': 'noreply@utah.gov',
     'to_addresses': '',
-    'prefix': f'ERA on {socket.gethostname()}: ',
+    'prefix': f'ERAP on {socket.gethostname()}: ',
 }
 
 #: Logging Settings
