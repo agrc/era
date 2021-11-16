@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -85,26 +86,11 @@ class TestFolderRotator:
         ]
         rotator = era.rotating.FolderRotator(base_dir_mock)
 
-        folders = rotator._get_all_but_n_most_recent_folder_paths(
+        folders_to_delete = rotator._get_all_but_n_most_recent_folder_paths(
             prefix='foo_', pattern='[0-9]{8}_[0-9]{6}', max_folder_count=2
         )
 
-        assert folders == [Path('bar/foo_20210101_010102'), Path('bar/foo_20210101_010103')]
-
-    # def test_get_all_but_n_most_recent_folder_paths_custom_pattern(self, mocker):
-    #     base_dir_mock = mocker.Mock()
-    #     base_dir_mock.iterdir.return_value = [
-    #         Path('bar/foo_20210101:010101'),
-    #         Path('bar/foo_20210101:010102'),
-    #         Path('bar/foo_20210101:010103')
-    #     ]
-    #     rotator = era.rotating.FolderRotator(base_dir_mock, 'foo_')
-
-    #     folders = rotator._get_all_but_n_most_recent_folder_paths(
-    #         prefix='foo_', pattern='[0-9]{8}:[0-9]{6}', max_folder_count=2
-    #     )
-
-    #     assert folders == [Path('bar/foo_20210101:010102'), Path('bar/foo_20210101:010103')]
+        assert folders_to_delete == [Path('bar/foo_20210101_010101')]
 
     def test_get_all_but_n_most_recent_folder_paths_defined_pattern_sorts_properly(self, mocker):
         base_dir_mock = mocker.Mock()
@@ -115,11 +101,28 @@ class TestFolderRotator:
         ]
         rotator = era.rotating.FolderRotator(base_dir_mock)
 
-        folders = rotator._get_all_but_n_most_recent_folder_paths(
-            prefix='foo_', pattern='[0-9]{8}_[0-9]{6}', max_folder_count=2
+        folders_to_delete = rotator._get_all_but_n_most_recent_folder_paths(
+            prefix='foo_', pattern='[0-9]{8}_[0-9]{6}', max_folder_count=1
         )
 
-        assert folders == [Path('bar/foo_20210101_010102'), Path('bar/foo_20210101_010103')]
+        assert folders_to_delete == [Path('bar/foo_20210101_010101'), Path('bar/foo_20210101_010102')]
+
+    def test_get_all_but_n_most_recent_folder_paths_excess_max_folder_count_doesnt_delete_any(self, mocker, caplog):
+        caplog.set_level(logging.DEBUG)
+        base_dir_mock = mocker.Mock()
+        base_dir_mock.iterdir.return_value = [
+            Path('bar/foo_20210101:010101'),
+            Path('bar/foo_20210101:010102'),
+            Path('bar/foo_20210101:010103')
+        ]
+        rotator = era.rotating.FolderRotator(base_dir_mock)
+
+        folders_to_delete = rotator._get_all_but_n_most_recent_folder_paths(
+            prefix='foo_', pattern='[0-9]{8}:[0-9]{6}', max_folder_count=5
+        )
+
+        assert folders_to_delete == []
+        assert 'max_folder_count greater than number of existing folders; no folders deleted' in caplog.text
 
     def test_delete_old_folders_swallows_exception(self, mocker):
         class_mock = mocker.Mock()
