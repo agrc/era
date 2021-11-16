@@ -9,7 +9,7 @@ import era.rotating
 
 class TestFolderRotator:
 
-    def test_get_new_download_dir_path_with_prefix(self, mocker):
+    def test_build_new_download_dir_path_with_prefix(self, mocker):
 
         today_mock = mocker.Mock()
         today_mock.strftime.return_value = 'today'
@@ -20,11 +20,11 @@ class TestFolderRotator:
         class_mock = mocker.Mock
         class_mock.base_dir = Path('foo')
 
-        test_dir = era.rotating.FolderRotator._get_new_download_dir_path(class_mock, 'bar_', 'fakeformat')
+        test_dir = era.rotating.FolderRotator._build_new_download_dir_path(class_mock, 'bar_', 'fakeformat')
 
         assert test_dir == Path('foo', 'bar_today')
 
-    def test_get_new_download_dir_path_no_prefix(self, mocker):
+    def test_build_new_download_dir_path_no_prefix(self, mocker):
 
         today_mock = mocker.Mock()
         today_mock.strftime.return_value = 'today'
@@ -35,7 +35,7 @@ class TestFolderRotator:
         class_mock = mocker.Mock
         class_mock.base_dir = Path('foo')
 
-        test_dir = era.rotating.FolderRotator._get_new_download_dir_path(class_mock, '', 'fakeformat')
+        test_dir = era.rotating.FolderRotator._build_new_download_dir_path(class_mock, '', 'fakeformat')
 
         assert test_dir == Path('foo', 'today')
 
@@ -122,7 +122,7 @@ class TestFolderRotator:
         )
 
         assert folders_to_delete == []
-        assert 'max_folder_count greater than number of existing folders; no folders deleted' in caplog.text
+        assert 'max_folder_count `5` greater than number of existing folders `3`; no folders deleted' in caplog.text
 
     def test_delete_old_folders_swallows_exception(self, mocker):
         class_mock = mocker.Mock()
