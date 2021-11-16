@@ -77,11 +77,15 @@ class FolderRotator:  # pylint: disable=too-few-public-methods
         and moves on to the next folder to be deleted.
 
         Args:
-            prefix (str, optional): Folder prefix for date. Any spacers(_, -, etc) must be provided in the prefix. Defaults to ''.
-            date_format (str, optional): Date format argument to strftime(). Defaults to '%Y%m%d_%H%M%S' (YYYYMMDD_hhmmss).
+            prefix (str, optional): Folder prefix for date. Any spacers(_, -, etc) must be provided in the prefix.
+                Defaults to ''.
+            date_format (str, optional): Date format argument to strftime(). Defaults to '%Y%m%d_%H%M%S'
+                (YYYYMMDD_hhmmss).
             exist_ok (bool, optional): Overwrite an existing folder?. Defaults to False.
-            pattern (str, optional): Regex date matching pattern to determine folders eligible for rotation deletion. Defaults to '[0-9]{8}_[0-9]{6}' (matches default date_format).
-            max_folder_count (int, optional): Number of folders to keep, including the folder created. Defaults to 10.
+            pattern (str, optional): Regex date matching pattern to determine folders eligible for rotation deletion.
+                Defaults to '[0-9]{8}_[0-9]{6}' (matches default date_format).
+            max_folder_count (int, optional): Number of folders to keep, not including the folder created.
+                Defaults to 10.
 
         Returns:
             Path: Path object to newly created folder
@@ -89,6 +93,7 @@ class FolderRotator:  # pylint: disable=too-few-public-methods
         folder_paths_to_delete = self._get_all_but_n_most_recent_folder_paths(prefix, pattern, max_folder_count)
         deleted_folders = self._delete_old_folders(folder_paths_to_delete)
         self._class_logger.info(f'Deleted folder(s) for rotation: {deleted_folders}')
+        #: Do folder creation after deletion so that we know our new folder will never be deleted beforehand
         download_dir = self._get_new_download_dir_path(prefix, date_format)
         created_dir_path = self._make_new_download_dir(download_dir, exist_ok)
 
