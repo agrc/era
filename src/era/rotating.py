@@ -96,7 +96,9 @@ class FolderRotator:  # pylint: disable=too-few-public-methods
         """
         folder_paths_to_delete = self._get_all_but_n_most_recent_folder_paths(prefix, pattern, max_folder_count)
         deleted_folders = self._delete_old_folders(folder_paths_to_delete)
-        self._class_logger.info(f'Deleted folder(s) for rotation: {[str(folder) for folder in deleted_folders]}')
+        self._class_logger.info(
+            f'Deleted {len(deleted_folders)} folder(s) for rotation: {[str(folder) for folder in deleted_folders]}'
+        )
         #: Do folder creation after deletion so that we know our new folder will never be deleted beforehand
         download_dir = self._build_new_download_dir_path(prefix, date_format)
         created_dir_path = self._make_new_download_dir(download_dir, exist_ok)

@@ -14,18 +14,7 @@ from palletjack import ColorRampReclassifier, FeatureServiceInLineUpdater, SFTPL
 from supervisor.message_handlers import SendGridHandler
 from supervisor.models import MessageDetails, Supervisor
 
-from . import secrets
-
-
-def _make_download_dir(exist_ok=False):
-    today = datetime.today()
-    download_dir = secrets.ERAP_BASE_DIR / today.strftime('%Y%m%d_%H%M%S')
-    try:
-        download_dir.mkdir(exist_ok=exist_ok)
-    except FileNotFoundError as error:
-        raise FileNotFoundError(f'Base directory {secrets.ERAP_BASE_DIR} does not exist.') from error
-    else:
-        return download_dir
+from . import rotating, secrets
 
 
 def _initialize():
@@ -52,6 +41,11 @@ def _initialize():
     palletjack_logger.addHandler(cli_handler)
     palletjack_logger.addHandler(log_handler)
 
+    #: Log any warnings at logging.WARNING
+    #: Put after everything else to prevent creating a duplicate, default formatter
+    #: (all log messages were duplicated if put at beginning)
+    logging.captureWarnings(True)
+
     erap_logger.debug('Creating Supervisor object')
     erap_supervisor = Supervisor(logger=erap_logger, log_path=secrets.ERAP_LOG_PATH)
     erap_supervisor.add_message_handler(
@@ -75,12 +69,15 @@ def process():
     gis = arcgis.gis.GIS(secrets.AGOL_ORG, secrets.AGOL_USER, secrets.AGOL_PASSWORD)
     arcpy.SignInToPortal(secrets.AGOL_ORG, secrets.AGOL_USER, secrets.AGOL_PASSWORD)
     erap_webmap_item = gis.content.get(secrets.ERAP_WEBMAP_ITEMID)
-    erap_download_dir = _make_download_dir()
+    rotator = rotating.FolderRotator(secrets.ERAP_BASE_DIR)
+    erap_download_dir = rotator.get_rotated_directory(max_folder_count=secrets.ROTATE_COUNT)
 
     #: Load the latest data from FTP
     module_logger.info('Getting data from FTP')
-    erap_loader = SFTPLoader(secrets, erap_download_dir)
-    files_downloaded = erap_loader.download_sftp_files(sftp_folder=secrets.SFTP_FOLDER)
+    erap_loader = SFTPLoader(
+        secrets.SFTP_HOST, secrets.SFTP_USERNAME, secrets.SFTP_PASSWORD, secrets.KNOWNHOSTS, erap_download_dir
+    )
+    files_downloaded = erap_loader.download_sftp_folder_contents(sftp_folder=secrets.SFTP_FOLDER)
     dataframe = erap_loader.read_csv_into_dataframe(secrets.ERAP_FILE_NAME, secrets.ERAP_DATA_TYPES)
 
     #: Update the AGOL data
