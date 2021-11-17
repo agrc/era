@@ -53,7 +53,7 @@ class FolderRotator:  # pylint: disable=too-few-public-methods
                 self._class_logger.debug(f'Attempting to delete `{folder}`')
                 shutil.rmtree(folder)
             except Exception:
-                pass
+                self._class_logger.warning(f'Could not delete `{folder}; delete manually`')
             else:
                 self._class_logger.debug(f'Successfully deleted `{folder}`')
                 deleted_folders.append(folder)
