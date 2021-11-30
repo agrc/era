@@ -45,6 +45,7 @@ ERAP_DATA_TYPES = {  #: Column names and types for csv -> dataframe conversion
 #: Feature Service Updating Settings
 ERAP_KEY_COLUMN = ''  #: The column in the new dataframe that is the key between it and the feature service
 ERAP_FEATURE_SERVICE_URL = ''  #: Should go directly to the layer in the feature service, ending in /0 (or /1, whatever)
+ERAP_FEATURE_LAYER_ITEMID = ''  #: AGOL Item ID of the feature layer to be updated.
 
 #: Reclassification Settings
 ERAP_WEBMAP_ITEMID = ''

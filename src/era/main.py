@@ -10,7 +10,7 @@ from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
 import arcgis
-from palletjack import ColorRampReclassifier, FeatureServiceInLineUpdater, SFTPLoader
+from palletjack import ColorRampReclassifier, FeatureServiceInlineUpdater, SFTPLoader
 from supervisor.message_handlers import SendGridHandler
 from supervisor.models import MessageDetails, Supervisor
 
@@ -82,9 +82,9 @@ def process():
 
     #: Update the AGOL data
     module_logger.info('Updating data in AGOL')
-    erap_updater = FeatureServiceInLineUpdater(dataframe, secrets.ERAP_KEY_COLUMN)
-    rows_updated = erap_updater.update_feature_service(
-        secrets.ERAP_FEATURE_SERVICE_URL, list(secrets.ERAP_DATA_TYPES.keys())
+    erap_updater = FeatureServiceInlineUpdater(gis, dataframe, secrets.ERAP_KEY_COLUMN)
+    rows_updated = erap_updater.update_existing_features_in_hosted_feature_layer(
+        secrets.ERAP_FEATURE_LAYER_ITEMID, list(secrets.ERAP_DATA_TYPES.keys())
     )
 
     #: Reclassify the break values on the webmap's color ramp
