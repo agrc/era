@@ -60,14 +60,11 @@ def process():
     start = datetime.now()
 
     erap_supervisor = _initialize()
-    # : Putting this down here so logging/supervisor catches any license issues
-    import arcpy  # pylint: disable=import-outside-toplevel
 
     module_logger = logging.getLogger(__name__)
 
     module_logger.debug('Logging into `%s` as `%s`', secrets.AGOL_ORG, secrets.AGOL_USER)
     gis = arcgis.gis.GIS(secrets.AGOL_ORG, secrets.AGOL_USER, secrets.AGOL_PASSWORD)
-    arcpy.SignInToPortal(secrets.AGOL_ORG, secrets.AGOL_USER, secrets.AGOL_PASSWORD)
     erap_webmap_item = gis.content.get(secrets.ERAP_WEBMAP_ITEMID)
     rotator = rotating.FolderRotator(secrets.ERAP_BASE_DIR)
     erap_download_dir = rotator.get_rotated_directory(max_folder_count=secrets.ROTATE_COUNT)
